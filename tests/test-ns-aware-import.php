@@ -97,12 +97,9 @@ class WXR_Tests_Namespace_Aware_Import extends WXR_Import_UnitTestCase {
 		$this->assertEquals( 3, wp_count_terms( 'post_tag' ) );
 		$foo = get_term_by( 'slug', 'foo', 'category' );
 		$this->assertEquals( 0, $foo->parent );
-// @todo this test would fail because importer-redux treats the <wp:category_parent>
-// as term->term_id, but wordpress-importer treats it as a term->slug, @see WXR_Importer::process_term()
-// when that gets corrected, this will be uncommented
-//		$bar = get_term_by( 'slug', 'bar', 'category' );
-//		$foo_bar = get_term_by( 'slug', 'foo-bar', 'category' );
-//		$this->assertEquals( $bar->term_id, $foo_bar->parent );
+		$bar = get_term_by( 'slug', 'bar', 'category' );
+		$foo_bar = get_term_by( 'slug', 'foo-bar', 'category' );
+		$this->assertEquals( $bar->term_id, $foo_bar->parent );
 
 		// check that posts/pages were imported correctly
 		$post_count = wp_count_posts( 'post' );
