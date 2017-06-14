@@ -1715,7 +1715,27 @@ class WXR_Importer extends WP_Importer {
 		}
 
 		$original_id = isset( $data['id'] )      ? (int) $data['id']      : 0;
-		$parent_id   = isset( $data['parent'] )  ? (int) $data['parent']  : 0;
+		if ( isset( $data['parent'] ) ) {
+ 			// $parent_existing = $this->term_exists( array( 'taxonomy' => $data['taxonomy'], 'slug' => $data['parent'] ) );
+			// @todo pvb: using $this->term_exists() doesn't seem to work.
+			//       maybe I just don't understand what that method is for (or maybe it's a bug,
+			//       e.g., maybe this method should add terms to $this->exists['terms'] once
+			//       they are successfully inserted).  So, for now I'm just using WP's term_exists()
+			//       and that seems to work.
+			// @todo pvb: this raises another general issue with a true streaming importer like this one:
+			//       just like the constraint that all <wp:author/>, <wp:term/>/, etc elements need to
+			//       occur in the WXR document before any <item/> elements, any <wp:category/> or <wp:term/>
+			//       elements that are the parent term for some other <wp:category/> or <wp:term/> element
+			//       must occur in the WXR document before the <wp:category/> or <wp:term/> for
+			//       which they are the parent.
+			$parent_existing = term_exists( $data['parent'], $data['taxonomy'] );
+			if ( $parent_existing ) {
+				$data['parent'] = (int) $parent_existing['term_id'];
+			}
+			else {
+				unset( $data['parent']);
+			}
+		}
 
 		$mapping_key = sha1( $data['taxonomy'] . ':' . $data['slug'] );
 		$existing = $this->term_exists( $data );
@@ -1741,6 +1761,7 @@ class WXR_Importer extends WP_Importer {
 		$termdata = array();
 		$allowed = array(
 			'slug' => true,
+			'parent' => true,
 			'description' => true,
 		);
 
